@@ -7,6 +7,17 @@ on:
         required: false
         type: string
         default: "1.7.5"
+    secrets:
+      AZURE_CREDENTIALS:
+        required: true
+      ARM_CLIENT_ID:
+        required: true
+      ARM_CLIENT_SECRET:
+        required: true
+      ARM_SUBSCRIPTION_ID:
+        required: true
+      ARM_TENANT_ID:
+        required: true
 
 jobs:
   terraform:
