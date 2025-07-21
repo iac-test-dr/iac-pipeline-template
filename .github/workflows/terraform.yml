@@ -1,18 +1,31 @@
 name: Terraform Plan
-description: Run terraform plan using Azure SP
+description: Composite action to run terraform plan using Azure SP
+
+inputs:
+  terraform_version:
+    description: "Terraform version"
+    required: false
+    default: "1.7.5"
 
 runs:
   using: "composite"
   steps:
-    - uses: actions/checkout@v4
-    - uses: hashicorp/setup-terraform@v3
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
       with:
         terraform_version: ${{ inputs.terraform_version }}
-    - run: terraform init
-    - run: terraform validate
-    - run: terraform plan
 
-inputs:
-  terraform_version:
-    required: false
-    default: "1.7.5"
+    - name: Terraform Init
+      run: terraform init
+
+    - name: Terraform Format Check
+      run: terraform fmt -check
+
+    - name: Terraform Validate
+      run: terraform validate
+
+    - name: Terraform Plan
+      run: terraform plan
