@@ -1,31 +1,42 @@
 name: Terraform Plan
-description: Composite action to run terraform plan using Azure SP
 
-inputs:
-  terraform_version:
-    description: "Terraform version"
-    required: false
-    default: "1.7.5"
+on:
+  workflow_call:
+    inputs:
+      terraform_version:
+        required: false
+        type: string
+        default: "1.7.5"
 
-runs:
-  using: "composite"
-  steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
 
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v3
-      with:
-        terraform_version: ${{ inputs.terraform_version }}
+    env:
+      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+      ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
 
-    - name: Terraform Init
-      run: terraform init
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - name: Terraform Format Check
-      run: terraform fmt -check
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ inputs.terraform_version }}
 
-    - name: Terraform Validate
-      run: terraform validate
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-    - name: Terraform Plan
-      run: terraform plan
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Plan
+        run: terraform plan
